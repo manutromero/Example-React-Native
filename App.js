@@ -4,6 +4,7 @@ import {Image} from 'react-native'
 import CoinsStack from 'crytoTracker/src/components/coins/CoinsStack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Colors from 'crytoTracker/src/res/colors'
+import FavoriteStack from 'crytoTracker/src/components/favorites/FavoritesStack'
 
 const Tabs = createBottomTabNavigator()
 
@@ -27,6 +28,21 @@ const App = () => {
               <Image 
                 style={{tintColor: color, width: size, height: size}}
                 source={require('crytoTracker/src/assets/bank.png')} 
+              />
+            ),
+          
+          }}
+          />
+
+
+          <Tabs.Screen 
+          component={FavoriteStack}
+          name="Favorites"
+          options={{
+            tabBarIcon: ( {size, color}) => (
+              <Image 
+                style={{tintColor: color, width: size, height: size}}
+                source={require('crytoTracker/src/assets/star.png')} 
               />
             ),
           
