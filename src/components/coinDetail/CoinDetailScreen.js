@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View,Image,Text, Pressable, SectionList, StyleSheet, FlatList} from 'react-native'
+import {View,Image,Text, Pressable, SectionList, StyleSheet, FlatList, Alert} from 'react-native'
 import Colors from 'crytoTracker/src/res/colors'
 import { withSafeAreaInsets } from 'react-native-safe-area-context';
 import Http from 'crytoTracker/src/libs/http'
@@ -22,21 +22,74 @@ class CoinDetailScreen extends Component {
         }
     }
 
-    addFavorite = () => {
+    addFavorite = async () => {
         
         const coin = JSON.stringify(this.state.coin);
-        const key = `favorite-{this.state.coin.id}`;
+        const key = `favorite-${this.state.coin.id}`;
     
-        const stored = Storage.instance.store(key, coin)
-        console.log("HOLA MUNDO".stored)
+        const stored = await Storage.instance.store(key, coin)
+
+        console.log("Stored",stored)
+        
         if(stored){
             this.setState({isFavorite: true})
         }
  
     }
 
-    removeFavorite = () => {
+    removeFavorite =  async () => {
+        console.log("Eliminando")
 
+
+        const key = `favorite-${this.state.coin.id}`;
+
+        console.log("key",key)
+
+        await Storage.instance.remove(key);
+
+        this.setState({ isFavorite: false })
+
+        Alert.alert("Remove Favorite","Are you sure", [{
+            text: "cancel",
+            onPress: () => {
+                console.log("Remove cancel onpress")
+            },
+            style: "cancel"
+        },
+        {
+            text: "Remove",
+            onPress: async () => {
+                console.log("Remove onpress")
+                const key = `favorite-${this.state.coin.id}`;
+
+                console.log("key",key)
+
+                await Storage.instance.remove(key);
+        
+                this.setState({ isFavorite: false })
+
+            },
+            style: "destructive"
+        }
+    ])
+
+    }
+
+    getFavorite =  async () => {
+        try {
+            const key = `favorite-${this.state.coin.id}`;
+
+            const favStr = await Storage.instance.get(key);
+
+           if(favStr != null){
+               this.setState({
+                   isFavorite: true
+               })
+           }
+            
+        } catch (error) {
+            console.log("Error en get Favorite", error)
+        }
     }
 
     getSymbolIcon = (name) =>{
@@ -80,7 +133,9 @@ class CoinDetailScreen extends Component {
         const { coin } = this.props.route.params;
         this.props.navigation.setOptions({ title: coin.symbol })
         this.getMarkets(coin.id)
-        this.setState({ coin })
+        this.setState({ coin },() => {
+            this.getFavorite();
+        })
     }
 
     render(){
